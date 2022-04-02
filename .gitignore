@@ -1,0 +1,9 @@
+# Local .terraform dirs and files
+**/.terraform/*
+**/.terraform.*
+
+# Python virtual envs dirs
+**/.venv/*
+
+# Python bytecode files
+*.pyc
