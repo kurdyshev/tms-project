@@ -11,6 +11,14 @@ on:
         options:
         - apply
         - destroy
+  pull_request:
+    types:
+      - closed
+    paths:
+      - 'terraform/**'
+  push:
+    paths:
+      - 'terraform/**'
 
 jobs:
   terraform:
