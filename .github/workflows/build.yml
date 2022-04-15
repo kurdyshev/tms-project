@@ -9,7 +9,7 @@ on:
 jobs:
 
   terraform:
-    uses: ./github/workflows/terraform.yml
+    uses: ./.github/workflows/terraform.yml
 
   build:
 
