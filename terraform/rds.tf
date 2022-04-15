@@ -42,16 +42,16 @@ resource "aws_db_subnet_group" "default" {
 resource "aws_db_instance" "default" {
   allocated_storage    = 20
   backup_window        = "03:00-04:00"
-  ca_cert_identifier   = "rds-ca-2022"
   db_subnet_group_name = "db-subnet-group"
+  depends_on           = [aws_db_subnet_group.default]
   engine_version       = "14.2"
   engine               = "postgres"
   identifier           = "production"
-  instance_class       = "db.t2.micro"
+  instance_class       = "db.t3.micro"
   maintenance_window   = "sun:08:00-sun:09:00"
-  db_name              = "django-app"
+  db_name              = "django"
   parameter_group_name = "default.postgres14"
-  #   password             = data.aws_ssm_parameter.db_instance__password.value
-  skip_final_snapshot = true
-  username            = "postgres"
+  password             = var.db_password
+  skip_final_snapshot  = true
+  username             = "postgres"
 }

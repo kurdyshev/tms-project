@@ -35,7 +35,7 @@ resource "aws_subnet" "public__b" {
 
 resource "aws_subnet" "private__a" {
   availability_zone       = "us-east-1a"
-  cidr_block              = "10.10.0.0/24"
+  cidr_block              = "10.0.10.0/24"
   map_public_ip_on_launch = false
 
   tags = {
@@ -48,7 +48,7 @@ resource "aws_subnet" "private__a" {
 
 resource "aws_subnet" "private__b" {
   availability_zone       = "us-east-1b"
-  cidr_block              = "10.10.1.0/24"
+  cidr_block              = "10.0.11.0/24"
   map_public_ip_on_launch = false
 
   tags = {

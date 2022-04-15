@@ -1,7 +1,4 @@
-# FROM python:3-alpine
-FROM python:3
-
-# RUN apk add --no-cache python3-dev py3-pip py3-virtualenv sqlitebrowser
+FROM python:3-alpine
 
 WORKDIR /usr/src/app
 

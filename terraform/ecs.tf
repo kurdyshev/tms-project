@@ -66,7 +66,7 @@ resource "aws_launch_configuration" "default" {
   iam_instance_profile        = aws_iam_instance_profile.ecs.name
   image_id                    = data.aws_ami.default.id
   instance_type               = "t2.micro"
-  key_name                    = "django-app"
+  #   key_name                    = "django-app"
 
   lifecycle {
     create_before_destroy = true
@@ -75,7 +75,7 @@ resource "aws_launch_configuration" "default" {
   name_prefix = "lauch-configuration-"
 
   root_block_device {
-    volume_size = 10
+    volume_size = 30
     volume_type = "gp2"
   }
 
@@ -112,6 +112,18 @@ resource "aws_autoscaling_group" "default" {
   ]
 }
 
+resource "aws_ecr_repository" "default" {
+  name = "django-app"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+output "repository_url" {
+  value = aws_ecr_repository.default.repository_url
+}
+
 resource "aws_ecs_cluster" "production" {
   lifecycle {
     create_before_destroy = true
@@ -123,4 +135,47 @@ resource "aws_ecs_cluster" "production" {
     Env  = "production"
     Name = "production"
   }
+}
+
+resource "aws_ecs_task_definition" "default" {
+  container_definitions = jsonencode([
+    {
+      cpu         = 1024
+      environment = [],
+      image       = "${aws_ecr_repository.default.repository_url}:latest",
+      memory      = 500,
+      name        = "app",
+      portMappings = [
+        {
+          containerPort = 8000,
+          hostPort      = 0
+        }
+      ]
+    }
+  ])
+  family                   = "django-app"
+  memory                   = 500
+  network_mode             = "bridge"
+  requires_compatibilities = ["EC2"]
+}
+
+data "aws_ecs_task_definition" "default" {
+  task_definition = aws_ecs_task_definition.default.family
+}
+
+resource "aws_ecs_service" "default" {
+  cluster                 = aws_ecs_cluster.production.id
+  depends_on              = [aws_iam_role_policy_attachment.ecs]
+  desired_count           = 1
+  enable_ecs_managed_tags = true
+  force_new_deployment    = true
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.default.arn
+    container_name   = "app"
+    container_port   = 8000
+  }
+
+  name            = "django-app"
+  task_definition = "${aws_ecs_task_definition.default.family}:${data.aws_ecs_task_definition.default.revision}"
 }
