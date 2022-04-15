@@ -17,6 +17,13 @@ on:
       repository_url:
         description: "AWS ECR URL"
         value: ${{ jobs.terraform.outputs.output }}
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      TF_VAR_db_password:
+        required: true
 
   pull_request:
     types:
