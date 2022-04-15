@@ -76,7 +76,9 @@ jobs:
     # Generates outputs
     - name: Terraform Outputs
       id: tf-outputs
-      run: echo "::set-output name=repository_url::$(terraform output -raw repository_url)"
+      run: |
+        REPOSITORY_URL=$(terraform output -raw repository_url)
+        echo "::set-output name=repository_url::$REPOSITORY_URL"
 
     # Run 'terraform apply' or 'terraform destroy' depending on input parameter
     - name: Terraform Apply
