@@ -140,11 +140,32 @@ resource "aws_ecs_cluster" "production" {
 resource "aws_ecs_task_definition" "default" {
   container_definitions = jsonencode([
     {
-      cpu         = 1024
-      environment = [],
-      image       = "${aws_ecr_repository.default.repository_url}:latest",
-      memory      = 500,
-      name        = "app",
+      cpu = 512
+      environment = [
+        {
+          "name" : "RDS_DB_NAME",
+          "value" : "${var.rds_db_name}"
+        },
+        {
+          "name" : "RDS_USERNAME",
+          "value" : "${var.rds_username}"
+        },
+        {
+          "name" : "RDS_PASSWORD",
+          "value" : "${var.rds_password}"
+        },
+        {
+          "name" : "RDS_HOSTNAME",
+          "value" : "${aws_db_instance.default.address}"
+        },
+        {
+          "name" : "RDS_PORT",
+          "value" : "5432"
+        }
+      ],
+      image  = "${aws_ecr_repository.default.repository_url}:latest",
+      memory = 450,
+      name   = "app",
       portMappings = [
         {
           containerPort = 8000,
@@ -153,8 +174,9 @@ resource "aws_ecs_task_definition" "default" {
       ]
     }
   ])
+  depends_on               = [aws_db_instance.default]
   family                   = "django-app"
-  memory                   = 500
+  memory                   = 450
   network_mode             = "bridge"
   requires_compatibilities = ["EC2"]
 }
@@ -166,7 +188,7 @@ data "aws_ecs_task_definition" "default" {
 resource "aws_ecs_service" "default" {
   cluster                 = aws_ecs_cluster.production.id
   depends_on              = [aws_iam_role_policy_attachment.ecs]
-  desired_count           = 1
+  desired_count           = 2
   enable_ecs_managed_tags = true
   force_new_deployment    = true
 

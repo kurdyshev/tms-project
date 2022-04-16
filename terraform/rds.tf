@@ -51,7 +51,14 @@ resource "aws_db_instance" "default" {
   maintenance_window   = "sun:08:00-sun:09:00"
   db_name              = "django"
   parameter_group_name = "default.postgres14"
-  password             = var.db_password
+  password             = var.rds_password
   skip_final_snapshot  = true
   username             = "postgres"
+}
+
+output "db_endpoint" {
+  value = aws_db_instance.default.endpoint
+}
+output "db_address" {
+  value = aws_db_instance.default.address
 }
