@@ -77,7 +77,7 @@ jobs:
     - name: Terraform Outputs
       id: tf-outputs
       run: |
-        REPOSITORY_URL=$(terraform output -raw repository_url)
+        REPOSITORY_URL="$(terraform output -raw repository_url)"
         echo "::set-output name=repository_url::$REPOSITORY_URL"
 
     - name: Test output
