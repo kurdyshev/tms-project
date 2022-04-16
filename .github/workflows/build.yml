@@ -19,11 +19,9 @@ jobs:
 
     runs-on: ubuntu-latest
     needs: terraform
-    env:
-      REPOSITORY_URL: ${{ needs.terraform.outputs.repository_url }}
     steps:
-    - name: "Echo"
-      run: echo "$REPOSITORY_URL"
+    - name: "Save var"
+      run: echo "REPOSITORY_URL=${{ needs.terraform.outputs.repository_url }}" >> $GITHUB_ENV
     # - uses: actions/checkout@v3
     # - name: Build the Docker image
     #   run: docker build django-app --file docker/Dockerfile --tag django-app:$(date +%s)
@@ -31,8 +29,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: terraform
-    env:
-      REPOSITORY_URL: ${{ needs.terraform.outputs.repository_url }}
+    # env:
+    #   REPOSITORY_URL: ${{ needs.terraform.outputs.repository_url }}
     steps:
       - run: echo "$REPOSITORY_URL"
       - run: echo "hello"
