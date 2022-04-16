@@ -35,3 +35,4 @@ jobs:
       REPOSITORY_URL: ${{ needs.terraform.outputs.repository_url }}
     steps:
       - run: echo "$REPOSITORY_URL"
+      - run: echo "hello"
