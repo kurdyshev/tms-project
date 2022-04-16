@@ -5,6 +5,8 @@ resource "aws_vpc" "default" {
     Env  = "production"
     Name = "vpc"
   }
+  enable_dns_support = true
+  enable_dns_hostnames = true
 }
 
 resource "aws_subnet" "public__a" {

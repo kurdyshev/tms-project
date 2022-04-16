@@ -80,11 +80,11 @@ if 'RDS_DB_NAME' in os.environ:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'RDS_DB_NAME',
-            'USER': 'RDS_USERNAME',
-            'PASSWORD': 'RDS_PASSWORD',
-            'HOST': 'RDS_HOSTNAME',
-            'PORT': 'RDS_PORT',
+            'NAME': os.environ['RDS_DB_NAME'],
+            'USER': os.environ['RDS_USERNAME'],
+            'PASSWORD': os.environ['RDS_PASSWORD'],
+            'HOST': os.environ['RDS_HOSTNAME'],
+            'PORT': os.environ['RDS_PORT'],
         }
     }
 else:

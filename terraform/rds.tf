@@ -49,11 +49,12 @@ resource "aws_db_instance" "default" {
   identifier           = "production"
   instance_class       = "db.t3.micro"
   maintenance_window   = "sun:08:00-sun:09:00"
-  db_name              = "django"
+  db_name              = var.rds_db_name
   parameter_group_name = "default.postgres14"
   password             = var.rds_password
   skip_final_snapshot  = true
-  username             = "postgres"
+  username             = var.rds_username
+  publicly_accessible = true
 }
 
 output "db_endpoint" {

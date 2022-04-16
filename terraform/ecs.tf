@@ -84,11 +84,11 @@ resource "aws_launch_configuration" "default" {
 }
 
 resource "aws_autoscaling_group" "default" {
-  desired_capacity     = 1
+  desired_capacity     = 2
   health_check_type    = "EC2"
   launch_configuration = aws_launch_configuration.default.name
-  max_size             = 2
-  min_size             = 1
+  max_size             = 3
+  min_size             = 2
   name                 = "auto-scaling-group"
 
   tag {
@@ -191,6 +191,7 @@ resource "aws_ecs_service" "default" {
   desired_count           = 2
   enable_ecs_managed_tags = true
   force_new_deployment    = true
+  scheduling_strategy = "REPLICA"
 
   load_balancer {
     target_group_arn = aws_alb_target_group.default.arn
