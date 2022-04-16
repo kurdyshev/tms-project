@@ -80,6 +80,9 @@ jobs:
         REPOSITORY_URL=$(terraform output -raw repository_url)
         echo "::set-output name=repository_url::$REPOSITORY_URL"
 
+    - name: Test output
+      run: echo "${{ steps.tf-outputs.outputs.repository_url }}""
+
     # Run 'terraform apply' or 'terraform destroy' depending on input parameter
     - name: Terraform Apply
       if: github.event.inputs.command == 'apply'
