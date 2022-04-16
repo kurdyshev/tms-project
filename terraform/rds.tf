@@ -54,7 +54,7 @@ resource "aws_db_instance" "default" {
   password             = var.rds_password
   skip_final_snapshot  = true
   username             = var.rds_username
-  publicly_accessible = true
+  publicly_accessible  = true
 }
 
 output "db_endpoint" {

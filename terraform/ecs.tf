@@ -191,7 +191,7 @@ resource "aws_ecs_service" "default" {
   desired_count           = 2
   enable_ecs_managed_tags = true
   force_new_deployment    = true
-  scheduling_strategy = "REPLICA"
+  scheduling_strategy     = "REPLICA"
 
   load_balancer {
     target_group_arn = aws_alb_target_group.default.arn
