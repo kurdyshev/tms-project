@@ -42,7 +42,7 @@ jobs:
           ECR_REPOSITORY: django-app
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build --file docker/Dockerfile --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG django-app
+          docker build --file docker/Dockerfile --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest django-app
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
     # - uses: actions/checkout@v3
     # - name: Build the Docker image
