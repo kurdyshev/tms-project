@@ -60,6 +60,8 @@ jobs:
     # Install the latest version of Terraform CLI
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_wrapper: false
 
     # Initialize a new or existing Terraform working directory
     - name: Terraform Init
