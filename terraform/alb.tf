@@ -61,3 +61,7 @@ resource "aws_alb_listener" "default" {
   port              = 80
   protocol          = "HTTP"
 }
+
+output "alb_dns_name" {
+  value = aws_alb.default.dns_name
+}

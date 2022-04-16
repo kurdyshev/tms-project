@@ -11,7 +11,7 @@ on:
         options:
         - apply
         - destroy
-  
+
   workflow_call:
     outputs:
       repository_url:
@@ -26,8 +26,6 @@ on:
         required: true
 
   pull_request:
-    types:
-      - closed
     paths:
       - 'terraform/**'
   push:
@@ -80,11 +78,7 @@ jobs:
       id: tf-outputs
       run: |
         REPOSITORY_URL="$(terraform output -raw repository_url)"
-        echo "$REPOSITORY_URL"
         echo "::set-output name=repository_url::$REPOSITORY_URL"
-
-    - name: Test output
-      run: echo "${{ steps.tf-outputs.outputs.repository_url }}"
 
     # Run 'terraform apply' or 'terraform destroy' depending on input parameter
     - name: Terraform Apply
