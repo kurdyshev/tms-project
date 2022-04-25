@@ -9,9 +9,10 @@ RUN apk add --no-cache postgresql-libs &&\
     apk --purge del .build-deps
 
 COPY . .
-RUN chmod +x entrypoint.sh
-
+RUN python manage.py makemigrations &&\
+    python manage.py migrate &&\
+    if [ "$DJANGO_SUPERUSER_USERNAME" != "" ];\
+    then python manage.py createsuperuser --noinput;\
+    fi
 EXPOSE 8000
-
-ENTRYPOINT [ "entrypoint.sh" ]
-CMD [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]
+CMD [ "python", "./manage.py", "runserver", "0.0.0.0:8000" ]
