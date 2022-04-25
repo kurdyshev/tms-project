@@ -1,0 +1,136 @@
+name: 'Terraform'
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Terraform Command'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+        - apply
+        - destroy
+
+  # workflow_call:
+  #   outputs:
+  #     repository_url:
+  #       description: "AWS ECR URL"
+  #       value: ${{ jobs.terraform.outputs.output }}
+  #   secrets:
+  #     AWS_ACCESS_KEY_ID:
+  #       required: true
+  #     AWS_SECRET_ACCESS_KEY:
+  #       required: true
+  #     TF_VAR_rds_password:
+  #       required: true
+
+  pull_request:
+    paths:
+      - 'terraform/**'
+  push:
+    paths:
+      - 'terraform/**'
+
+jobs:
+  # check-secrets:
+  #   name: 'Check Secrets'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - id: db-name
+  #       run: |
+  #         if [[ "${{ secrets.DB_NAME }}" != "" ]] then
+  #           echo "action_state=yellow" >> $GITHUB_ENV
+  #         fi
+
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_rds_password: ${{ secrets.DB_PASSWORD }}
+      TF_VAR_s3_bucket: ${{ secrets.S3_BUCKET }}
+      TF_VAR_s3_key: ${{ secrets.S3_KEY }}
+      TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
+
+    # outputs:
+    #   output: ${{ steps.tf-outputs.outputs.repository_url }}
+
+    # Use the Bash shell and 'terraform' directory for all 'run' steps
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform
+
+    steps:
+
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Set optional variables if they are present in github secrets
+    - name: Set optional variables
+      run: |
+          if [[ "${{ secrets.DB_NAME }}" != "" ]]; then
+            echo "TF_VAR_rds_db_name=${{ secrets.DB_NAME }}" >> "$GITHUB_ENV"
+          fi
+          if [[ "${{ secrets.DB_USERNAME }}" != "" ]]; then
+            echo "TF_VAR_rds_username=${{ secrets.DB_USERNAME }}" >> "$GITHUB_ENV"
+          fi
+          if [[ "${{ secrets.DJANGO_USERNAME }}" != "" ]]; then
+            echo "TF_VAR_django_username=${{ secrets.DJANGO_USERNAME }}" >> "$GITHUB_ENV"
+          fi
+          if [[ "${{ secrets.DJANGO_PASSWORD }}" != "" ]]; then
+            echo "TF_VAR_django_password=${{ secrets.DJANGO_PASSWORD }}" >> "$GITHUB_ENV"
+          fi
+          if [[ "${{ secrets.DJANGO_EMAIL }}" != "" ]]; then
+            echo "TF_VAR_django_email=${{ secrets.DJANGO_EMAIL }}" >> "$GITHUB_ENV"
+          fi
+
+    # Install the latest version of Terraform CLI
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_wrapper: false
+
+    # Initialize a new or existing Terraform working directory
+    - name: Terraform Init
+      # run: terraform init
+      run: |
+        terraform init -reconfigure \
+        -backend-config="region=$TF_VAR_aws_region" \
+        -backend-config="bucket=$TF_VAR_s3_bucket" \
+        -backend-config="key=$TF_VAR_s3_key"
+
+    # Checks that all Terraform configuration files adhere to a canonical format
+    - name: Terraform Format
+      run: terraform fmt -check -diff
+
+    # Generates an execution plan for Terraform
+    - name: Terraform Plan
+      run: terraform plan
+
+    # Generates outputs
+    # - name: Terraform Outputs
+    #   id: tf-outputs
+    #   run: |
+    #     REPOSITORY_URL="$(terraform output -raw repository_url)"
+    #     echo "::set-output name=repository_url::$REPOSITORY_URL"
+
+    # Run 'terraform apply' or 'terraform destroy' depending on input parameter
+    - name: Terraform Apply
+      if: github.event.inputs.command == 'apply'
+      run: terraform apply -auto-approve
+
+    - name: Terraform Destroy
+      if: github.event.inputs.command == 'destroy'
+      run: terraform destroy -auto-approve
+
+    # # Send Telegram notification
+    # - name: Send Telegram notification
+    #   uses: appleboy/telegram-action@master
+    #   with:
+    #     to: ${{ secrets.TELEGRAM_TO }}
+    #     token: ${{ secrets.TELEGRAM_TOKEN }}
