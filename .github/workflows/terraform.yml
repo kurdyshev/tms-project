@@ -12,19 +12,6 @@ on:
         - apply
         - destroy
 
-  # workflow_call:
-  #   outputs:
-  #     repository_url:
-  #       description: "AWS ECR URL"
-  #       value: ${{ jobs.terraform.outputs.output }}
-  #   secrets:
-  #     AWS_ACCESS_KEY_ID:
-  #       required: true
-  #     AWS_SECRET_ACCESS_KEY:
-  #       required: true
-  #     TF_VAR_rds_password:
-  #       required: true
-
   pull_request:
     paths:
       - 'terraform/**'
@@ -33,15 +20,6 @@ on:
       - 'terraform/**'
 
 jobs:
-  # check-secrets:
-  #   name: 'Check Secrets'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - id: db-name
-  #       run: |
-  #         if [[ "${{ secrets.DB_NAME }}" != "" ]] then
-  #           echo "action_state=yellow" >> $GITHUB_ENV
-  #         fi
 
   terraform:
     name: 'Terraform'
@@ -54,9 +32,6 @@ jobs:
       TF_VAR_s3_bucket: ${{ secrets.S3_BUCKET }}
       TF_VAR_s3_key: ${{ secrets.S3_KEY }}
       TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
-
-    # outputs:
-    #   output: ${{ steps.tf-outputs.outputs.repository_url }}
 
     # Use the Bash shell and 'terraform' directory for all 'run' steps
     defaults:
@@ -112,13 +87,6 @@ jobs:
     - name: Terraform Plan
       run: terraform plan
 
-    # Generates outputs
-    # - name: Terraform Outputs
-    #   id: tf-outputs
-    #   run: |
-    #     REPOSITORY_URL="$(terraform output -raw repository_url)"
-    #     echo "::set-output name=repository_url::$REPOSITORY_URL"
-
     # Run 'terraform apply' or 'terraform destroy' depending on input parameter
     - name: Terraform Apply
       if: github.event.inputs.command == 'apply'
@@ -127,10 +95,3 @@ jobs:
     - name: Terraform Destroy
       if: github.event.inputs.command == 'destroy'
       run: terraform destroy -auto-approve
-
-    # # Send Telegram notification
-    # - name: Send Telegram notification
-    #   uses: appleboy/telegram-action@master
-    #   with:
-    #     to: ${{ secrets.TELEGRAM_TO }}
-    #     token: ${{ secrets.TELEGRAM_TOKEN }}
