@@ -1,15 +1,17 @@
-# FROM python:3-alpine
-FROM python:3
-
-# RUN apk add --no-cache python3-dev py3-pip py3-virtualenv sqlitebrowser
+FROM python:3-alpine
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
+RUN apk add --no-cache postgresql-libs &&\
+    apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev &&\
+    python -m pip install -r requirements.txt --no-cache-dir &&\
+    apk --purge del .build-deps
 
 COPY . .
-RUN python3 manage.py migrate
+RUN chmod +x entrypoint.sh
 
 EXPOSE 8000
-CMD [ "python", "./manage.py", "runserver", "0.0.0.0:8000" ]
+
+ENTRYPOINT [ "entrypoint.sh" ]
+CMD [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]

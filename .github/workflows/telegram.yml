@@ -1,0 +1,27 @@
+name: 'Telegram message'
+
+on:
+  # push:
+  workflow_dispatch:
+  workflow_call:
+    # outputs:
+    #   repository_url:
+    #     description: "AWS ECR URL"
+    #     value: ${{ jobs.terraform.outputs.output }}
+    secrets:
+      TELEGRAM_TO:
+        description: "Chat ID"
+        required: true
+      TELEGRAM_TOKEN:
+        description: "Bot token"
+        required: true
+
+jobs:
+  telegram-message:
+    runs-on: ubuntu-latest
+    steps:
+    - name: send default message
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}

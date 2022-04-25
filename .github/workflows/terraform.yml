@@ -12,7 +12,15 @@ on:
         - apply
         - destroy
 
+  pull_request:
+    paths:
+      - 'terraform/**'
+  push:
+    paths:
+      - 'terraform/**'
+
 jobs:
+
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
@@ -20,6 +28,10 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_rds_password: ${{ secrets.DB_PASSWORD }}
+      TF_VAR_s3_bucket: ${{ secrets.S3_BUCKET }}
+      TF_VAR_s3_key: ${{ secrets.S3_KEY }}
+      TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
 
     # Use the Bash shell and 'terraform' directory for all 'run' steps
     defaults:
@@ -28,17 +40,43 @@ jobs:
         working-directory: terraform
 
     steps:
+
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v3
 
+    # Set optional variables if they are present in github secrets
+    - name: Set optional variables
+      run: |
+          if [[ "${{ secrets.DB_NAME }}" != "" ]]; then
+            echo "TF_VAR_rds_db_name=${{ secrets.DB_NAME }}" >> "$GITHUB_ENV"
+          fi
+          if [[ "${{ secrets.DB_USERNAME }}" != "" ]]; then
+            echo "TF_VAR_rds_username=${{ secrets.DB_USERNAME }}" >> "$GITHUB_ENV"
+          fi
+          if [[ "${{ secrets.DJANGO_USERNAME }}" != "" ]]; then
+            echo "TF_VAR_django_username=${{ secrets.DJANGO_USERNAME }}" >> "$GITHUB_ENV"
+          fi
+          if [[ "${{ secrets.DJANGO_PASSWORD }}" != "" ]]; then
+            echo "TF_VAR_django_password=${{ secrets.DJANGO_PASSWORD }}" >> "$GITHUB_ENV"
+          fi
+          if [[ "${{ secrets.DJANGO_EMAIL }}" != "" ]]; then
+            echo "TF_VAR_django_email=${{ secrets.DJANGO_EMAIL }}" >> "$GITHUB_ENV"
+          fi
+
     # Install the latest version of Terraform CLI
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_wrapper: false
 
     # Initialize a new or existing Terraform working directory
     - name: Terraform Init
-      run: terraform init
+      run: |
+        terraform init -reconfigure \
+        -backend-config="region=$TF_VAR_aws_region" \
+        -backend-config="bucket=$TF_VAR_s3_bucket" \
+        -backend-config="key=$TF_VAR_s3_key"
 
     # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format

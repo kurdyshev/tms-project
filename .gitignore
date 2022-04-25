@@ -5,5 +5,7 @@
 # Python virtual envs dirs
 **/.venv/*
 
-# Python bytecode files
-*.pyc
+# Python cache
+__pycache__
+
+**/.DS_Store
